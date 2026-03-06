@@ -12,6 +12,14 @@ impl PatternPlayer {
         Self { pattern, cursor: 0 }
     }
 
+    fn scope_display(scope: &str) -> alloc::string::String {
+        if scope.is_empty() {
+            alloc::string::String::new()
+        } else {
+            alloc::format!(" in scope {scope:?}")
+        }
+    }
+
     fn expect(
         &mut self,
         expected_kind: InteractionKind,
@@ -28,10 +36,11 @@ impl PatternPlayer {
         );
 
         let step = &self.pattern.steps()[self.cursor];
+        let scope = Self::scope_display(&step.scope);
 
         assert!(
             step.kind == expected_kind,
-            "pattern violation at step {} (label {:?}): \
+            "pattern violation at step {}{scope} (label {:?}): \
              expected {}, got {expected_kind}",
             self.cursor,
             step.label,
@@ -40,7 +49,7 @@ impl PatternPlayer {
 
         assert!(
             step.type_id == type_id,
-            "pattern violation at step {} (label {:?}): \
+            "pattern violation at step {}{scope} (label {:?}): \
              expected type {}, got {type_name}",
             self.cursor,
             step.label,
@@ -49,7 +58,7 @@ impl PatternPlayer {
 
         assert!(
             step.count == count,
-            "pattern violation at step {} (label {:?}): \
+            "pattern violation at step {}{scope} (label {:?}): \
              expected count {}, got {count}",
             self.cursor,
             step.label,

@@ -1,4 +1,5 @@
 use alloc::vec::Vec;
+use core::fmt;
 
 use rand::{CryptoRng, RngCore};
 
@@ -17,6 +18,16 @@ where
 {
     inner: ProverState<H, R>,
     player: PatternPlayer,
+}
+
+impl<H, R> fmt::Debug for CheckedProverState<H, R>
+where
+    H: DuplexSpongeInterface,
+    R: RngCore + CryptoRng,
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "CheckedProverState<{}>", core::any::type_name::<H>())
+    }
 }
 
 impl<H, R> CheckedProverState<H, R>
@@ -62,6 +73,10 @@ where
         self.inner.public_messages(messages);
     }
 
+    /// Absorbs an iterator of public messages.
+    ///
+    /// Unlike [`ProverState::public_messages_iter`], this collects the iterator
+    /// into a `Vec` to determine the count before checking against the pattern.
     pub fn public_messages_iter<J>(&mut self, messages: J)
     where
         J: IntoIterator,
@@ -81,6 +96,10 @@ where
         self.inner.prover_messages(messages);
     }
 
+    /// Absorbs an iterator of prover messages.
+    ///
+    /// Unlike [`ProverState::prover_messages_iter`], this collects the iterator
+    /// into a `Vec` to determine the count before checking against the pattern.
     pub fn prover_messages_iter<J>(&mut self, messages: J)
     where
         J: IntoIterator,

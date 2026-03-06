@@ -1,4 +1,5 @@
 use alloc::vec::Vec;
+use core::fmt;
 
 use crate::{
     Decoding, DuplexSpongeInterface, Encoding, NargDeserialize, StdHash, VerificationResult,
@@ -13,6 +14,15 @@ where
 {
     inner: crate::VerifierState<'a, H>,
     player: PatternPlayer,
+}
+
+impl<H> fmt::Debug for CheckedVerifierState<'_, H>
+where
+    H: DuplexSpongeInterface,
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "CheckedVerifierState<{}>", core::any::type_name::<H>())
+    }
 }
 
 impl<'a, H> CheckedVerifierState<'a, H>
@@ -48,6 +58,10 @@ where
         self.inner.public_messages(messages);
     }
 
+    /// Absorbs an iterator of public messages.
+    ///
+    /// Unlike [`VerifierState::public_messages_iter`], this collects the iterator
+    /// into a `Vec` to determine the count before checking against the pattern.
     pub fn public_messages_iter<J>(&mut self, messages: J)
     where
         J: IntoIterator,
@@ -72,6 +86,16 @@ where
     ) -> VerificationResult<Vec<T>> {
         self.player.expect_prover_messages::<T>(len);
         self.inner.prover_messages_vec(len)
+    }
+
+    pub fn verifier_messages<T: Decoding<[H::U]> + 'static, const N: usize>(&mut self) -> [T; N] {
+        self.player.expect_verifier_messages::<T>(N);
+        core::array::from_fn(|_| self.inner.verifier_message())
+    }
+
+    pub fn verifier_messages_vec<T: Decoding<[H::U]> + 'static>(&mut self, len: usize) -> Vec<T> {
+        self.player.expect_verifier_messages::<T>(len);
+        (0..len).map(|_| self.inner.verifier_message()).collect()
     }
 
     pub fn check_eof(self) -> VerificationResult<()> {

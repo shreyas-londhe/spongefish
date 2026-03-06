@@ -223,7 +223,8 @@ pub use narg_prover::ProverState;
 pub use narg_verifier::VerifierState;
 #[cfg(feature = "pattern")]
 pub use pattern::{
-    CheckedProverState, CheckedVerifierState, InteractionKind, InteractionPattern, PatternBuilder,
+    CheckedProverState, CheckedVerifierState, Interaction, InteractionKind, InteractionPattern,
+    PatternBuilder,
 };
 #[cfg(feature = "derive")]
 pub use spongefish_derive::{Codec, Decoding, Encoding, NargDeserialize, Unit};
