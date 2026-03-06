@@ -2,6 +2,8 @@ use core::{fmt::Arguments, marker::PhantomData};
 
 use rand::rngs::StdRng;
 
+#[cfg(feature = "pattern")]
+use crate::pattern::{CheckedProverState, CheckedVerifierState, InteractionPattern};
 #[cfg(feature = "sha3")]
 use crate::VerifierState;
 use crate::{DuplexSpongeInterface, Encoding, ProverState, StdHash};
@@ -127,6 +129,57 @@ impl<I, S> DomainSeparator<WithInstance<'_, I>, S> {
         }
         verifier_state.public_message(self.instance.0);
         verifier_state
+    }
+}
+
+#[cfg(all(feature = "pattern", feature = "sha3"))]
+impl<I, S> DomainSeparator<WithInstance<'_, I>, S>
+where
+    I: Encoding,
+    S: Encoding,
+{
+    pub fn checked_prover(&self, pattern: &InteractionPattern) -> CheckedProverState {
+        CheckedProverState::new(self.std_prover(), pattern.clone())
+    }
+
+    pub fn checked_verifier<'ver>(
+        &self,
+        pattern: &InteractionPattern,
+        narg_string: &'ver [u8],
+    ) -> CheckedVerifierState<'ver> {
+        CheckedVerifierState::new(self.std_verifier(narg_string), pattern.clone())
+    }
+}
+
+#[cfg(feature = "pattern")]
+impl<I, S> DomainSeparator<WithInstance<'_, I>, S> {
+    pub fn to_checked_prover<H>(
+        &self,
+        h: H,
+        pattern: &InteractionPattern,
+    ) -> CheckedProverState<H, StdRng>
+    where
+        H: DuplexSpongeInterface,
+        [u8; 64]: Encoding<[H::U]>,
+        S: Encoding<[H::U]>,
+        I: Encoding<[H::U]>,
+    {
+        CheckedProverState::new(self.to_prover(h), pattern.clone())
+    }
+
+    pub fn to_checked_verifier<'ver, H>(
+        &self,
+        h: H,
+        pattern: &InteractionPattern,
+        narg_string: &'ver [u8],
+    ) -> CheckedVerifierState<'ver, H>
+    where
+        H: DuplexSpongeInterface,
+        [u8; 64]: Encoding<[H::U]>,
+        S: Encoding<[H::U]>,
+        I: Encoding<[H::U]>,
+    {
+        CheckedVerifierState::new(self.to_verifier(h, narg_string), pattern.clone())
     }
 }
 

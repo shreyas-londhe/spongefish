@@ -221,6 +221,10 @@ pub use error::{VerificationError, VerificationResult};
 pub use io::{NargDeserialize, NargSerialize};
 pub use narg_prover::ProverState;
 pub use narg_verifier::VerifierState;
+#[cfg(feature = "pattern")]
+pub use pattern::{
+    CheckedProverState, CheckedVerifierState, InteractionKind, InteractionPattern, PatternBuilder,
+};
 #[cfg(feature = "derive")]
 pub use spongefish_derive::{Codec, Decoding, Encoding, NargDeserialize, Unit};
 
@@ -268,6 +272,9 @@ macro_rules! session {
 
 #[cfg(all(not(feature = "sha3"), feature = "blake3"))]
 pub type DefaultHash = instantiations::Shake128;
+
+#[cfg(feature = "pattern")]
+pub mod pattern;
 
 /// Unit-tests.
 #[cfg(test)]

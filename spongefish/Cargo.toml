@@ -50,6 +50,7 @@ risc0-zkp = { workspace = true, optional = true }
 default = ["sha3", "zeroize"]
 # feature flag for hazardous features
 yolocrypto = []
+pattern = []
 # Core features
 derive = ["dep:spongefish-derive"]
 zeroize = ["dep:zeroize"]
