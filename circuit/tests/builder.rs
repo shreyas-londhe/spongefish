@@ -22,6 +22,7 @@ fn instance_builder() -> TestInstanceBuilder {
     PermutationInstanceBuilder::new()
 }
 
+#[cfg(not(target_arch = "wasm32"))]
 fn assert_panics_with(expected: &str, f: impl FnOnce()) {
     let panic = std::panic::catch_unwind(std::panic::AssertUnwindSafe(f))
         .expect_err("expected closure to panic");
@@ -172,6 +173,7 @@ pub fn public_vars_are_returned_by_variable_index() {
     );
 }
 
+#[cfg(not(target_arch = "wasm32"))]
 #[test]
 pub fn linear_equation_terms_must_be_bound_unless_zero() {
     let inst_builder = instance_builder();
@@ -197,6 +199,7 @@ pub fn linear_equation_terms_must_be_bound_unless_zero() {
     assert_eq!(inst_builder.linear_constraints().as_ref().len(), 1);
 }
 
+#[cfg(not(target_arch = "wasm32"))]
 #[test]
 pub fn allocate_vars_vec_overflow_does_not_mutate_allocator() {
     let inst_builder = instance_builder();
